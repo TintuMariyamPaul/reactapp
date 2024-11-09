@@ -1,0 +1,38 @@
+# Azure DevOps Pipeline for Building a React Application
+
+trigger:
+  branches:
+    include:
+      - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: Build_React_App
+  displayName: 'Build React Application'
+  steps:
+    
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install
+        npm run build
+      displayName: 'Install dependencies and build React app'
+
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: 'build'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/build'
+      displayName: 'Copy build files to staging directory'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)/build'
+        artifactName: 'react-app-build'
+      displayName: 'Publish Build Artifacts'
+
